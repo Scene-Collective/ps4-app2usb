@@ -10,7 +10,7 @@
   },
   "author": "Stooged",
   "url": "https://github.com/stooged/AppToUsb-50X",
-  "redirect": true,
+  "redirect": false,
   "reload": false,
   "offline": true
 }
