@@ -33,9 +33,12 @@ int kpayload_get_fw_version(struct thread *td, struct kpayload_get_fw_version_ar
 
   uint64_t fw_version = 0x666;
 
-  if (!memcmp((char *)(&((uint8_t *)__readmsr(0xC0000082))[-K505_XFAST_SYSCALL]), (char[4]){0x7F, 0x45, 0x4C, 0x46}, 4)) {
-    kernel_base = &((uint8_t *)__readmsr(0xC0000082))[-K505_XFAST_SYSCALL];
-    if (!memcmp((char *)(kernel_base + K505_PRINTF), (char[12]){0x55, 0x48, 0x89, 0xE5, 0x53, 0x48, 0x83, 0xEC, 0x58, 0x48, 0x8D, 0x1D}, 12)) {
+  if (!memcmp((char *)(&((uint8_t *)__readmsr(0xC0000082))[-K672_XFAST_SYSCALL]), (char[4]){0x7F, 0x45, 0x4C, 0x46}, 4)) {
+    kernel_base = &((uint8_t *)__readmsr(0xC0000082))[-K672_XFAST_SYSCALL];
+    if (!memcmp((char *)(kernel_base + K672_PRINTF), (char[12]){0x55, 0x48, 0x89, 0xE5, 0x53, 0x48, 0x83, 0xEC, 0x58, 0x48, 0x8D, 0x1D}, 12)) {
+      fw_version = 0x672;
+      copyout = (void *)(kernel_base + K672_COPYOUT);
+    } else if (!memcmp((char *)(kernel_base + K505_PRINTF), (char[12]){0x55, 0x48, 0x89, 0xE5, 0x53, 0x48, 0x83, 0xEC, 0x58, 0x48, 0x8D, 0x1D}, 12)) {
       fw_version = 0x505;
       copyout = (void *)(kernel_base + K505_COPYOUT);
     } else if (!memcmp((char *)(kernel_base + K503_PRINTF), (char[12]){0x55, 0x48, 0x89, 0xE5, 0x53, 0x48, 0x83, 0xEC, 0x58, 0x48, 0x8D, 0x1D}, 12)) {
@@ -116,6 +119,11 @@ int kpayload_jailbreak(struct thread *td, struct kpayload_jailbreak_args *args) 
     kernel_ptr = (uint8_t *)kernel_base;
     got_prison0 = (void **)&kernel_ptr[K505_PRISON_0];
     got_rootvnode = (void **)&kernel_ptr[K505_ROOTVNODE];
+  } else if (fw_version == 0x672) {
+    kernel_base = &((uint8_t *)__readmsr(0xC0000082))[-K672_XFAST_SYSCALL];
+    kernel_ptr = (uint8_t *)kernel_base;
+    got_prison0 = (void **)&kernel_ptr[K672_PRISON_0];
+    got_rootvnode = (void **)&kernel_ptr[K672_ROOTVNODE];
   } else {
     return -1;
   }
