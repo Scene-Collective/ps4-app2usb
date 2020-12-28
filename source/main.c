@@ -1,4 +1,4 @@
-#include "kernel_utils.h"
+#include "ps4.h"
 
 #define INI_FILE "app2usb.ini"
 
@@ -573,6 +573,7 @@ void copyDir(char *sourcedir, char *destdir) {
 }
 
 void *nthread_func(void *arg) {
+  UNUSED(arg);
   time_t t1, t2;
   t1 = 0;
 
@@ -600,6 +601,7 @@ void *nthread_func(void *arg) {
 }
 
 void *sthread_func(void *arg) {
+  UNUSED(arg);
   while (nthread_run) {
     if (isxfer) {
       tmpcnt = xfer_cnt;
@@ -654,12 +656,12 @@ char *getusbpath() {
 }
 
 int _main(struct thread *td) {
+  UNUSED(td);
+
   initKernel();
   initLibc();
-  initPthread();
 
-  uint64_t fw_version = get_fw_version();
-  jailbreak(fw_version);
+  jailbreak();
 
   initSysUtil();
 

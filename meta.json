@@ -1,7 +1,7 @@
 {
   "title": "App2USB",
   "version": "1.0.0",
-  "updated": "2001-01-01T00:00:00Z",
+  "updated": "2021-01-01T00:00:00Z",
   "device": "PlayStation 4",
   "firmware": "",
   "description": {
@@ -9,7 +9,7 @@
     "en": "Unofficial external drive support for applications. Reads `app2usb.ini` from the external drive for options."
   },
   "author": "Stooged",
-  "url": "https://github.com/stooged/AppToUsb-50X",
+  "url": "https://github.com/Scene-Collective/ps4-app2usb",
   "redirect": false,
   "reload": false,
   "offline": true
