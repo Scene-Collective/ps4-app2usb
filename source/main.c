@@ -583,11 +583,11 @@ void *nthread_func(void *arg) {
       if ((t2 - t1) >= 20) {
         t1 = t2;
         if (tmpcnt >= 1048576) {
-          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %u MB/s", cfile, xfer_pct, tmpcnt / 1048576);
+          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %i MB/s", cfile, xfer_pct, tmpcnt / 1048576);
         } else if (tmpcnt >= 1024) {
-          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %u KB/s", cfile, xfer_pct, tmpcnt / 1024);
+          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %i KB/s", cfile, xfer_pct, tmpcnt / 1024);
         } else {
-          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %u B/s", cfile, xfer_pct, tmpcnt);
+          sprintf(notify_buf, "Copying: %s\n\n%u%% completed\nSpeed: %i B/s", cfile, xfer_pct, tmpcnt);
         }
         printf_notification(notify_buf);
       }
