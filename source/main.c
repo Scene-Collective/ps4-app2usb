@@ -666,6 +666,8 @@ int _main(struct thread *td) {
 
   initSysUtil();
 
+  printf_notification("Running App2USB");
+
   xfer_cnt = 0;
   isxfer = 0;
   nthread_run = 1;
@@ -673,9 +675,10 @@ int _main(struct thread *td) {
   scePthreadCreate(&nthread, NULL, nthread_func, NULL, "nthread");
   ScePthread sthread;
   scePthreadCreate(&sthread, NULL, sthread_func, NULL, "sthread");
-  printf_notification("Warning this payload will modify the filesystem on your PS4\n\nUnplug your USB drive to cancel this");
+
+  printf_notification("Warning this payload will modify the filesystem on your PS4\n\nUnplug your USB device to cancel this");
   sceKernelSleep(10);
-  printf_notification("Last warning\n\nUnplug your USB drive to cancel this");
+  printf_notification("Last warning\n\nUnplug your USB device to cancel this");
   sceKernelSleep(10);
 
   char *usb_mnt_path = getusbpath();
@@ -731,9 +734,9 @@ int _main(struct thread *td) {
     printf_notification("Complete.");
   } else {
     if (hasfound == 1) {
-      printf_notification("A USB drive was found but it was set to SKIP_DRIVE\n\nNo other USB drive was found.");
+      printf_notification("A USB device was found but it was set to SKIP_DRIVE\n\nNo other USB device was found.");
     } else {
-      printf_notification("No USB drive found.\n\nYou must use an exFat formatted USB drive.");
+      printf_notification("No USB device found.\n\nYou must use an exFat formatted USB device.");
     }
   }
   nthread_run = 0;
