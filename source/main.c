@@ -1,11 +1,15 @@
+//#define DEBUG_SOCKET
+#define DEBUG_IP "192.168.2.2"
+#define DEBUG_PORT 9023
+
 #include "ps4.h"
 
 #define INI_FILE "app2usb.ini"
 
-int nthread_run;
-char notify_buf[1024];
-char ini_file_path[256];
-char usb_mount_path[256];
+int nthread_run = 1;
+char notify_buf[512] = {0};
+char ini_file_path[PATH_MAX] = {0};
+char usb_mount_path[PATH_MAX] = {0};
 int xfer_pct;
 long xfer_cnt;
 char *cfile;
@@ -25,7 +29,7 @@ void makeini() {
 }
 
 char *getContentID(char *pkgFile) {
-  char buffer[37];
+  char buffer[37] = {0};
   char *retval = malloc(sizeof(char) * 37);
   int pfile = open(pkgFile, O_RDONLY, 0);
 
@@ -38,7 +42,7 @@ char *getContentID(char *pkgFile) {
 }
 
 char *getPkgName(char *sourcefile) {
-  char *retval = malloc(sizeof(char) * 256);
+  char *retval = malloc(sizeof(char) * PATH_MAX);
   char *jfile = replace_str(sourcefile, ".pkg", ".json");
 
   if (file_exists(jfile)) {
@@ -231,7 +235,7 @@ int mountpoint() {
     close(cfile);
     if (strlen(idata) != 0) {
       if (strstr(idata, "MOUNT_POINT=") != NULL) {
-        char pnt[2];
+        char pnt[2] = {0};
         int spos = substring(idata, "MOUNT_POINT=") + 12;
         strncpy(pnt, idata + spos, 1);
         switch (pnt[0]) {
@@ -311,7 +315,7 @@ void copyFile(char *sourcefile, char *destfile) {
         unlink(sourcefile);
         symlink(destfile, sourcefile);
       } else {
-        char cmsg[1024];
+        char cmsg[1024] = {0};
         unlink(destfile);
         sprintf(cmsg, "%s failed to transfer properly", sourcefile);
         printf_notification(cmsg);
@@ -324,8 +328,8 @@ void copyFile(char *sourcefile, char *destfile) {
 void copypkg(char *sourcepath, char *destpath) {
   if (!symlink_exists(sourcepath)) {
     if (isfpkg(sourcepath) == 0) {
-      char cmsg[1024];
-      char dstfile[256];
+      char cmsg[1024] = {0};
+      char dstfile[PATH_MAX] = {0};
       char *ndestpath;
       char *pknm = getPkgName(sourcepath);
       sprintf(dstfile, "%s.pkg", pknm);
@@ -367,7 +371,7 @@ void checkusbpkg(char *sourcedir, char *destdir) {
   if (isusbcheck()) {
     if (!symlink_exists(sourcedir)) {
       if (isfpkg(sourcedir) == 0) {
-        char dstfile[256];
+        char dstfile[PATH_MAX] = {0};
         char *pknm = getPkgName(sourcedir);
 
         sprintf(dstfile, "%s.pkg", pknm);
@@ -384,7 +388,7 @@ void checkusbpkg(char *sourcedir, char *destdir) {
           DIR *dir;
           struct dirent *dp;
           struct stat info;
-          char upkg_path[1024];
+          char upkg_path[1024] = {0};
 
           dir = opendir(usb_mount_path);
           if (dir) {
@@ -413,8 +417,8 @@ void checkusbpkg(char *sourcedir, char *destdir) {
 void relink(char *sourcepath, char *destpath) {
   if (isrelink()) {
     if (symlink_exists(sourcepath)) {
-      char dstfile[256];
-      char cidfile[50];
+      char dstfile[PATH_MAX] = {0};
+      char cidfile[50] = {0};
       char *ndestpath;
 
       if (file_exists(destpath)) {
@@ -460,8 +464,8 @@ void copyMeta(char *sourcedir, char *destdir, int tousb) {
   DIR *dir;
   struct dirent *dp;
   struct stat info;
-  char src_path[1024];
-  char dst_path[1024];
+  char src_path[1024] = {0};
+  char dst_path[1024] = {0};
 
   dir = opendir(sourcedir);
   if (!dir) {
@@ -504,8 +508,8 @@ void copyMeta(char *sourcedir, char *destdir, int tousb) {
 void makePkgInfo(char *pkgFile, char *destpath) {
   if (strstr(pkgFile, "app.pkg") != NULL && !isnometa()) {
     char *titleid;
-    char srcfile[256];
-    char dstfile[256];
+    char srcfile[PATH_MAX] = {0};
+    char dstfile[PATH_MAX] = {0};
 
     destpath = replace_str(destpath, "/app.pkg", "");
     titleid = replace_str(pkgFile, "/user/app/", "");
@@ -528,7 +532,8 @@ void copyDir(char *sourcedir, char *destdir) {
   DIR *dir;
   struct dirent *dp;
   struct stat info;
-  char src_path[1024], dst_path[1024];
+  char src_path[1024] = {0};
+  char dst_path[1024] = {0};
 
   dir = opendir(sourcedir);
   if (!dir) {
@@ -589,7 +594,7 @@ void *nthread_func(void *arg) {
         } else {
           sprintf(notify_buf, "Copying: %s\n\n%i%% completed\nSpeed: %i B/s", cfile, xfer_pct, tmpcnt);
         }
-        systemMessage(notify_buf);
+        printf_notification("%s", notify_buf);
       }
     } else {
       t1 = 0;
@@ -615,14 +620,13 @@ void *sthread_func(void *arg) {
 
 char *getusbpath() {
   int usbdir;
-  char tmppath[64];
-  char a2upath[64];
-  char tmpusb[64];
-  tmpusb[0] = '\0';
+  char tmppath[64] = {0};
+  char a2upath[64] = {0};
+  char tmpusb[64] = {0};
   char *retval;
 
   for (int x = 0; x <= 7; x++) {
-    sprintf(tmppath, "/mnt/usb%i/.dirtest", x);
+    sprintf(tmppath, "/mnt/usb%i/.probe", x);
     usbdir = open(tmppath, O_WRONLY | O_CREAT | O_TRUNC, 0777);
     if (usbdir != -1) {
       close(usbdir);
@@ -662,6 +666,11 @@ int _main(struct thread *td) {
   initLibc();
   initPthread();
 
+#ifdef DEBUG_SOCKET
+  initNetwork();
+  DEBUG_SOCK = SckConnect(DEBUG_IP, DEBUG_PORT);
+#endif
+
   jailbreak();
 
   initSysUtil();
@@ -670,10 +679,11 @@ int _main(struct thread *td) {
 
   xfer_cnt = 0;
   isxfer = 0;
-  nthread_run = 1;
   ScePthread nthread;
+  memset_s(&nthread, sizeof(ScePthread), 0, sizeof(ScePthread));
   scePthreadCreate(&nthread, NULL, nthread_func, NULL, "nthread");
   ScePthread sthread;
+  memset_s(&sthread, sizeof(ScePthread), 0, sizeof(ScePthread));
   scePthreadCreate(&sthread, NULL, sthread_func, NULL, "sthread");
 
   printf_notification("Warning this payload will modify the filesystem on your PS4\n\nUnplug your USB device to cancel this");
@@ -685,7 +695,7 @@ int _main(struct thread *td) {
   if (usb_mnt_path != NULL) {
     sprintf(usb_mount_path, "%s", usb_mnt_path);
     free(usb_mnt_path);
-    char tmppath[256];
+    char tmppath[PATH_MAX] = {0};
     sprintf(tmppath, "%s/PS4", usb_mount_path);
     if (!dir_exists(tmppath)) {
       mkdir(tmppath, 0777);
@@ -696,7 +706,7 @@ int _main(struct thread *td) {
     }
     int defmp = mountpoint();
     if (defmp == -1 || defmp != mntpoint) {
-      char mpmsg[256];
+      char mpmsg[PATH_MAX] = {0};
 
       sprintf(mpmsg, "The defined MOUNT_POINT is incorrect.\nMOUNT_POINT=%i is defined but the drive is mounted to USB%i", defmp, mntpoint);
       printf_notification(mpmsg);
@@ -707,7 +717,7 @@ int _main(struct thread *td) {
     printf_notification("Moving Apps to USB\n\nThis will take a while if you have lots of games installed");
     copyDir("/user/app", tmppath);
     if (!isignupdates()) {
-      char tmppathp[256];
+      char tmppathp[PATH_MAX] = {0};
       sprintf(tmppathp, "%s/PS4/updates", usb_mount_path);
       if (!dir_exists(tmppathp)) {
         mkdir(tmppathp, 0777);
@@ -716,7 +726,7 @@ int _main(struct thread *td) {
       copyDir("/user/patch", tmppathp);
     }
     if (isdlc()) {
-      char tmppathd[256];
+      char tmppathd[PATH_MAX] = {0};
       sprintf(tmppathd, "%s/PS4/dlc", usb_mount_path);
       if (!dir_exists(tmppathd)) {
         mkdir(tmppathd, 0777);
@@ -740,6 +750,11 @@ int _main(struct thread *td) {
     }
   }
   nthread_run = 0;
+
+#ifdef DEBUG_SOCKET
+  printf_socket("\nClosing socket...\n\n");
+  SckClose(DEBUG_SOCK);
+#endif
 
   return 0;
 }
