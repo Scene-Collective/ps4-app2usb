@@ -22,11 +22,11 @@ jobs:
         run: |
           git clone https://github.com/Scene-Collective/ps4-payload-sdk ~/ps4-payload-sdk && cd "$_"
           chmod +x install.sh
-          ./install.sh
+          sudo ./install.sh
       -
         name: "Build Payload"
         run: |
-          export PS4SDK="$(echo $HOME)/PS4SDK"
+          export PS4SDK=/opt/ps4sdk
           make
       -
         name: "Upload Binary Artifact"
