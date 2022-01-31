@@ -6,7 +6,8 @@
   "firmware": "",
   "description": {
     "default": "Unofficial external drive support for applications. Reads `app2usb.ini` from the external drive for options.",
-    "en": "Unofficial external drive support for applications. Reads `app2usb.ini` from the external drive for options."
+    "en": "Unofficial external drive support for applications. Reads `app2usb.ini` from the external drive for options.",
+    "fr": "Prise en charge non officielle des lecteurs externes pour les applications. Lire `app2usb.ini` à partir du lecteur externe pour les options."
   },
   "author": "Stooged",
   "url": "https://github.com/Scene-Collective/ps4-app2usb",
